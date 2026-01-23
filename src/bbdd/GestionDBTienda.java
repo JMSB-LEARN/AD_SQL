@@ -496,6 +496,7 @@ public class GestionDBTienda {
             mostrarClientes();
             System.out.println("¿Que cliente ha efectuado la compra?");
             stmtClientStatus.setInt(Integer.parseInt(sc.nextLine()),1);
+            //AQUI hacer resultset
 
             System.out.print("Nombre del cliente: ");
             stmtCompra.setString(1, sc.nextLine());
