@@ -76,12 +76,23 @@ public class GestionDBTienda {
 
     public boolean annadirProducto(Scanner sc) {
         String sql = "INSERT INTO producto (nombre, precio, id_fabricante) VALUES (?, ?, ?)";
+        String sqlNameCheck = "Select nombre from producto where nombre=?";
 
         try (PreparedStatement stmt = connection.prepareStatement(sql); PreparedStatement providerChk = connection.prepareStatement("select id from fabricante where id=?")) {
 
             System.out.print("Nombre del producto: ");
-            stmt.setString(1, sc.nextLine());
+            String name = sc.nextLine();
+            try (PreparedStatement stmtNameCheck = connection.prepareStatement(sqlNameCheck)) {
+                stmtNameCheck.setString(1, name);
 
+                try (ResultSet rs = stmtNameCheck.executeQuery()) {
+                    if (rs.next()) {
+                        System.out.println("Producto ya existente");
+                        return false;
+                    }
+                }
+            }
+            stmt.setString(1, name);
             System.out.print("Precio: ");
             double precio = Double.parseDouble(sc.nextLine());
             stmt.setDouble(2, precio);
@@ -127,10 +138,7 @@ public class GestionDBTienda {
     private Producto buscarProducto(int id) {
         Producto p = null;
         try {
-            PreparedStatement stmt = connection.prepareStatement("SELECT *"
-                    + " FROM producto p"
-                    + " WHERE id = ?"
-            );
+            PreparedStatement stmt = connection.prepareStatement("SELECT *" + " FROM producto p" + " WHERE id = ?");
 
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
@@ -163,9 +171,7 @@ public class GestionDBTienda {
         p.setPrecio(sc.nextDouble());
 
         try {
-            PreparedStatement stmt = connection.prepareStatement("UPDATE producto"
-                    + " SET nombre = ?, precio = ?"
-                    + " WHERE id = ?");
+            PreparedStatement stmt = connection.prepareStatement("UPDATE producto" + " SET nombre = ?, precio = ?" + " WHERE id = ?");
 
             stmt.setString(1, p.getNombre());
             stmt.setDouble(2, p.getPrecio());
@@ -190,8 +196,7 @@ public class GestionDBTienda {
         }
 
         try {
-            PreparedStatement stmt = connection.prepareStatement("DELETE FROM producto"
-                    + " WHERE id = ?");
+            PreparedStatement stmt = connection.prepareStatement("DELETE FROM producto" + " WHERE id = ?");
 
             stmt.setInt(1, p.getId());
 
@@ -260,10 +265,7 @@ public class GestionDBTienda {
     public void mostrarProductosFabricante(String nombreFabricante) {
         List<Producto> productos = new ArrayList<>();
         try {
-            PreparedStatement stmt = connection.prepareStatement("SELECT *"
-                    + " FROM producto p JOIN fabricante f ON p.id_fabricante = f.id"
-                    + " WHERE f.nombre = ?"
-            );
+            PreparedStatement stmt = connection.prepareStatement("SELECT *" + " FROM producto p JOIN fabricante f ON p.id_fabricante = f.id" + " WHERE f.nombre = ?");
 
             stmt.setString(1, nombreFabricante);
             ResultSet rs = stmt.executeQuery();
@@ -295,10 +297,7 @@ public class GestionDBTienda {
     private Fabricante buscarFabricante(int id) {
         Fabricante f = null;
         try {
-            PreparedStatement stmt = connection.prepareStatement("SELECT *"
-                    + " FROM fabricante f"
-                    + " WHERE id = ?"
-            );
+            PreparedStatement stmt = connection.prepareStatement("SELECT *" + " FROM fabricante f" + " WHERE id = ?");
 
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
@@ -329,9 +328,7 @@ public class GestionDBTienda {
         sc.nextLine();
 
         try {
-            PreparedStatement stmt = connection.prepareStatement("UPDATE fabricante"
-                    + " SET nombre = ?"
-                    + " WHERE id = ?");
+            PreparedStatement stmt = connection.prepareStatement("UPDATE fabricante" + " SET nombre = ?" + " WHERE id = ?");
 
             stmt.setString(1, f.getNombre());
             stmt.setInt(2, f.getId());
@@ -355,8 +352,7 @@ public class GestionDBTienda {
         }
 
         try {
-            PreparedStatement stmt = connection.prepareStatement("DELETE FROM fabricante"
-                    + " WHERE id = ?");
+            PreparedStatement stmt = connection.prepareStatement("DELETE FROM fabricante" + " WHERE id = ?");
 
             stmt.setInt(1, f.getId());
 
@@ -450,7 +446,7 @@ public class GestionDBTienda {
 
             System.out.print("Nuevo cliente activo: \nyes\nno");
             stmt.setBoolean(5, Boolean.parseBoolean(sc.nextLine()));
-            return (stmt.executeUpdate())>0;
+            return (stmt.executeUpdate()) > 0;
 
         } catch (NumberFormatException e) {
             System.err.println("Error: El nombre debe de ser valido;.");
@@ -492,10 +488,10 @@ public class GestionDBTienda {
         String sqlCompra = "INSERT INTO compra (id_cliente) VALUES (?)";
         String sqlCompraDetalles = "INSERT INTO compra (id_cliente) VALUES (?)";
 
-        try (PreparedStatement stmtClientStatus = connection.prepareStatement(sqlClientStatus);PreparedStatement stmtCompra = connection.prepareStatement(sqlCompra); PreparedStatement stmtCompraDetalles = connection.prepareStatement(sqlCompraDetalles)) {
+        try (PreparedStatement stmtClientStatus = connection.prepareStatement(sqlClientStatus); PreparedStatement stmtCompra = connection.prepareStatement(sqlCompra); PreparedStatement stmtCompraDetalles = connection.prepareStatement(sqlCompraDetalles)) {
             mostrarClientes();
             System.out.println("¿Que cliente ha efectuado la compra?");
-            stmtClientStatus.setInt(Integer.parseInt(sc.nextLine()),1);
+            stmtClientStatus.setInt(Integer.parseInt(sc.nextLine()), 1);
             //AQUI hacer resultset
 
             System.out.print("Nombre del cliente: ");
