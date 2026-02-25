@@ -3,9 +3,9 @@ package model;
 public class Cliente {
     private int idCliente;
     private String nombre, email,telefono,direccion;
-    private boolean active;
+    private Boolean active;
 
-    public Cliente(int idCliente, String nombre, String email, String telefono, String direccion, boolean active) {
+    public Cliente(int idCliente, String nombre, String email, String telefono, String direccion, Boolean active) {
         this.idCliente = idCliente;
         this.nombre = nombre;
         this.email = email;
@@ -50,11 +50,11 @@ public class Cliente {
         this.direccion = direccion;
     }
 
-    public boolean isActive() {
+    public Boolean isActive() {
         return active;
     }
 
-    public void setActive(boolean active) {
+    public void setActive(Boolean active) {
         this.active = active;
     }
 
