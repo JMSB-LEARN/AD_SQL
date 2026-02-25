@@ -29,6 +29,15 @@ public class Input {
         }
     }
 
+    public static String pedirTextoNulleable(String mensaje) {
+        while (true) {
+            System.out.print(mensaje + ": ");
+            String texto = sc.nextLine().trim();
+            if (!texto.isEmpty()) return texto;
+            return null;
+        }
+    }
+
     public static Integer pedirNumeroNulleable(String mensaje) {
         while (true) {
             System.out.print(mensaje + " (o presiona Enter para omitir): ");
@@ -59,6 +68,17 @@ public class Input {
         while (true) {
             System.out.print(mensaje + " (true/false): ");
             String entrada = sc.nextLine().trim().toLowerCase();
+            if (entrada.equals("true")) return true;
+            if (entrada.equals("false")) return false;
+            System.out.println("Error: Debes escribir 'true' o 'false'.");
+        }
+    }
+
+    public static Boolean pedirBooleanoEstrictoNulleable(String mensaje) {
+        while (true) {
+            System.out.print(mensaje + " (true/false) (o presiona Enter para omitir) : ");
+            String entrada = sc.nextLine().trim().toLowerCase();
+            if (entrada.isEmpty())return null;
             if (entrada.equals("true")) return true;
             if (entrada.equals("false")) return false;
             System.out.println("Error: Debes escribir 'true' o 'false'.");

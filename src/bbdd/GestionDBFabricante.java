@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.Scanner;
 
 public class GestionDBFabricante {
-    private Connection connection;
-    private GestionDBFabricante instancia;
+    private static Connection connection;
+    private static GestionDBFabricante instancia;
 
-    public GestionDBFabricante getInstancia() {
+    public static GestionDBFabricante getInstancia() {
         if (instancia == null) {
             instancia = new GestionDBFabricante();
         }

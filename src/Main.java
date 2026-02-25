@@ -1,12 +1,28 @@
+import bbdd.GestionDBCliente;
+import bbdd.GestionDBCompra;
+import bbdd.GestionDBFabricante;
+import bbdd.GestionDBProducto;
 import jmsb.utils.Input;
+import model.Cliente;
 import model.Producto;
 
-import java.util.Scanner;
 
 public class Main {
+    private static GestionDBCliente gestionDBCliente;
+    private static GestionDBCompra gestionDBCompra;
+    private static GestionDBProducto gestionDBProducto;
+    private static GestionDBFabricante gestionDBFabricante;
 
     public static void main(String[] args) {
+        initGestion();
         mostrarMenu();
+    }
+
+    private static void initGestion() {
+        gestionDBCliente=GestionDBCliente.getInstancia();
+        gestionDBCompra=GestionDBCompra.getInstancia();
+        gestionDBFabricante=GestionDBFabricante.getInstancia();
+        gestionDBProducto=GestionDBProducto.getInstancia();
     }
 
     private static void mostrarMenu() {
@@ -56,31 +72,21 @@ public class Main {
     }
 
     private static void annadirCliente() {
-        System.out.print("Nombre del cliente: ");
-        System.out.print("Email del cliente: ");
-        System.out.print("Telefono del cliente: ");
-        System.out.print("Direccion del cliente: ");
-        GestionDBConnection.getInstancia().annadirCliente();
+        gestionDBCliente.annadirCliente(new Cliente(Input.pedirTexto("Nombre del cliente: "),Input.pedirTexto("Email del cliente: "),Input.pedirTexto("Telefono del cliente: "),Input.pedirTexto("Direccion del cliente: ")));
     }
 
     private static void modificarCliente() {
-
         mostrarClientes();
-        System.out.println("¿Cual es el id del cliente a modificar?");
-        System.out.print("Nuevo nombre del cliente: ");
-        System.out.print("Nuevo email del cliente: ");
-        System.out.print("Nuevo telefono del cliente: ");
-        System.out.print("Nuevo direccion del cliente: ");
-        System.out.print("Nuevo cliente activo: \nyes\nno");
-        GestionDBConnection.getInstancia().modificarCliente();
+        gestionDBCliente.modificarCliente(new Cliente(Input.pedirNumero("¿Cual es el id del cliente a modificar?"),Input.pedirTextoNulleable("Nombre del cliente: "),Input.pedirTextoNulleable("Email del cliente: "),Input.pedirTextoNulleable("Telefono del cliente: "),Input.pedirTextoNulleable("Direccion del cliente: "),Input.pedirBooleanoEstrictoNulleable("¿Esta activo?: ")));
     }
 
     private static void eliminarCliente() {
-        GestionDBConnection.getInstancia().eliminarCliente();
+        mostrarClientes();
+        gestionDBCliente.eliminarCliente(Input.pedirNumero("¿Cual es el id del cliente a eliminar?"));
     }
 
     private static void mostrarClientes() {
-        GestionDBConnection.getInstancia().mostrarClientes();
+        gestionDBCliente.mostrarClientes();
     }
 
 

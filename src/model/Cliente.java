@@ -13,6 +13,13 @@ public class Cliente {
         this.direccion = direccion;
         this.active = active;
     }
+    public Cliente(String nombre, String email, String telefono, String direccion) {
+        this.nombre = nombre;
+        this.email = email;
+        this.telefono = telefono;
+        this.direccion = direccion;
+        this.active = true;
+    }
 
     public int getIdCliente() {
         return idCliente;

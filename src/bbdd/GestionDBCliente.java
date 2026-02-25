@@ -9,13 +9,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class GestionDBCliente {
-    private Connection connection;
-    private GestionDBCliente instancia;
+    private static Connection connection;
+    private static GestionDBCliente instancia;
 
-    public GestionDBCliente getInstancia() {
+    public static GestionDBCliente getInstancia() {
         if (instancia == null) {
             instancia = new GestionDBCliente();
         }
@@ -121,15 +120,14 @@ public class GestionDBCliente {
         }
     }
 
-    public void eliminarCliente() {
+    public void eliminarCliente(int id) {
 
 
         String sql = "DELET from Cliente where id_cliente=?";
 
         try (PreparedStatement stmt = connection.prepareStatement(sql); PreparedStatement providerChk = connection.prepareStatement("select id from fabricante where id=?")) {
-            mostrarClientes();
-            System.out.println("¿Cual es el id del cliente a eliminar?");
-            stmt.setInt(Integer.parseInt(sc.nextLine()), 1);
+
+            stmt.setInt(1, id);
 
 
         } catch (NumberFormatException e) {

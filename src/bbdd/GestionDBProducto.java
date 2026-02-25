@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.Scanner;
 
 public class GestionDBProducto {
-    private Connection connection;
-    private GestionDBProducto instancia;
+    private static Connection connection;
+    private static GestionDBProducto instancia;
 
-    public GestionDBProducto getInstancia() {
+    public static GestionDBProducto getInstancia() {
         if (instancia == null) {
             instancia = new GestionDBProducto();
         }

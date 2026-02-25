@@ -3,10 +3,10 @@ package bbdd;
 import java.sql.Connection;
 
 public class GestionDBCompra {
-    private Connection connection;
-    private GestionDBCompra instancia;
+    private static Connection connection;
+    private static GestionDBCompra instancia;
 
-    public GestionDBCompra getInstancia() {
+    public static GestionDBCompra getInstancia() {
         if (instancia == null) {
             instancia = new GestionDBCompra();
         }
