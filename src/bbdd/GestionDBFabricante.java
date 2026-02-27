@@ -42,13 +42,12 @@ public class GestionDBFabricante {
         return fabricantes;
     }
 
-    public boolean annadirFabricante(Scanner sc) {
-        String sql = "INSERT INTO fabricante (nombre) VALUES (?,)";
+    public boolean annadirFabricante(Fabricante fabricante) {
+        String sql = "INSERT INTO fabricante (nombre) VALUES (?)";
 
         try (PreparedStatement stmt = connection.prepareStatement(sql); PreparedStatement providerChk = connection.prepareStatement("select id from fabricante where id=?")) {
 
-            System.out.print("Nombre del fabricante: ");
-            stmt.setString(1, sc.nextLine());
+            stmt.setString(1, fabricante.getNombre());
             int filasAfectadas = stmt.executeUpdate();
             return filasAfectadas > 0;
 
@@ -86,9 +85,7 @@ public class GestionDBFabricante {
                 String nombre = rs.getString("nombre");
                 double precio = rs.getDouble("precio");
                 int idFabricante = rs.getInt("id_fabricante");
-                String nombreFab = rs.getString("f.nombre");
-
-                Producto p = new Producto(id, nombre, precio, idFabricante, nombreFab);
+                Producto p = new Producto(id, nombre, precio, idFabricante);
                 productos.add(p);
             }
         } catch (SQLException ex) {
@@ -115,7 +112,6 @@ public class GestionDBFabricante {
 
             if (rs.next()) {
                 String nombre = rs.getString("nombre");
-
                 f = new Fabricante(id, nombre);
             }
         } catch (SQLException ex) {
@@ -126,23 +122,18 @@ public class GestionDBFabricante {
         return f;
     }
 
-    public boolean modificarFabricante(Scanner sc, int id) {
-        Fabricante f = buscarFabricante(id);
+    public boolean modificarFabricante(Fabricante fabricante) {
+        Fabricante f = buscarFabricante(fabricante.getId());
         if (f == null) {
             System.out.println("No se ha encontrado el fabricante indicado.");
             return false;
         }
 
-        System.out.println("Introduce el nuevo nombre:");
-        f.setNombre(sc.nextLine());
-
-        sc.nextLine();
-
         try {
             PreparedStatement stmt = connection.prepareStatement("UPDATE fabricante" + " SET nombre = ?" + " WHERE id = ?");
 
-            stmt.setString(1, f.getNombre());
-            stmt.setInt(2, f.getId());
+            stmt.setString(1, fabricante.getNombre());
+            stmt.setInt(2, fabricante.getId());
 
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -164,9 +155,7 @@ public class GestionDBFabricante {
 
         try {
             PreparedStatement stmt = connection.prepareStatement("DELETE FROM fabricante" + " WHERE id = ?");
-
             stmt.setInt(1, f.getId());
-
             stmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println("Error al eliminar el fabricante de la BBDD.");

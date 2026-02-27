@@ -49,6 +49,10 @@ public class Producto {
         this.precio = precio;
     }
 
+    public int getIdFabricante() {
+        return idFabricante;
+    }
+
     @Override
     public String toString() {
         return "Producto{" +

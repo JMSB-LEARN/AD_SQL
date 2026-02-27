@@ -46,45 +46,12 @@ public class GestionDBProducto {
 
     public boolean annadirProducto(Producto producto) {
         String sql = "INSERT INTO producto (nombre, precio, id_fabricante) VALUES (?, ?, ?)";
-        String sqlNameCheck = "Select Count(nombre) from producto where nombre=?";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql); PreparedStatement providerChk = connection.prepareStatement("select id from fabricante where id=?")) {
-            String name = producto.getNombre();
-            try (PreparedStatement stmtNameCheck = connection.prepareStatement(sqlNameCheck)) {
-                stmtNameCheck.setString(1, name);
-
-                try (ResultSet rs = stmtNameCheck.executeQuery()) {
-                    if (rs.getInt(1)>0) {
-                        System.out.println("Producto ya existente");
-                        return false;
-                    }
-                }
-            }
-            stmt.setString(1, name);
-            System.out.print("Precio: ");
-            double precio = producto.getPrecio();
-            stmt.setDouble(2, precio);
-
-            Boolean idValido = false;
-            int idFab = 0;
-            while (!idValido) {
-                mostrarFabricantes();
-                System.out.print("ID Fabricante: ");
-                idFab = Integer.parseInt(sc.nextLine());
-                providerChk.setInt(1, idFab);
-                if ((providerChk.executeQuery()).next()) {
-                    idValido = true;
-                } else {
-                    System.out.println("Id no reconocido, vuelva a intentarlo");
-                }
-            }
-            stmt.setInt(3, idFab);
-
-            int filasAfectadas = stmt.executeUpdate();
-            return filasAfectadas > 0;
-
-        } catch (NumberFormatException e) {
-            System.err.println("Error: El precio o el ID deben ser números válidos.");
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, producto.getNombre());
+            stmt.setDouble(2, producto.getPrecio());
+            stmt.setInt(3, producto.getIdFabricante());
+            return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Error de base de datos: " + e.getMessage());
             e.printStackTrace();
@@ -178,37 +145,39 @@ public class GestionDBProducto {
         System.out.println("Se ha eliminado la información del producto.");
         return true;
     }
-
-    public void realizarCompra(Scanner sc) {
-
-        String sqlClientStatus = "Select activo from clientes where id_cliente = ?";
-        String sqlCompra = "INSERT INTO compra (id_cliente) VALUES (?)";
-        String sqlCompraDetalles = "INSERT INTO compra (id_cliente) VALUES (?)";
-
-        try (PreparedStatement stmtClientStatus = connection.prepareStatement(sqlClientStatus); PreparedStatement stmtCompra = connection.prepareStatement(sqlCompra); PreparedStatement stmtCompraDetalles = connection.prepareStatement(sqlCompraDetalles)) {
-            mostrarClientes();
-            System.out.println("¿Que cliente ha efectuado la compra?");
-            stmtClientStatus.setInt(Integer.parseInt(sc.nextLine()), 1);
-            //AQUI hacer resultset
-
-            System.out.print("Nombre del cliente: ");
-            stmtCompra.setString(1, sc.nextLine());
-            System.out.print("Email del cliente: ");
-            stmtCompra.setString(2, sc.nextLine());
-            System.out.print("Telefono del cliente: ");
-            stmtCompra.setString(3, sc.nextLine());
-            System.out.print("Direccion del cliente: ");
-            stmtCompra.setString(4, sc.nextLine());
-            stmtCompra.setBoolean(5, true);
-            stmtCompra.executeUpdate();
-        } catch (NumberFormatException e) {
-            System.err.println("Error: El nombre debe de ser valido;.");
+    public boolean comprobarIdProducto(int id){
+        String sql="select count(id_producto) from producto where id =?";
+        try(PreparedStatement stmt = connection.prepareStatement(sql)){
+            stmt.setInt(1,id);
+            if(stmt.executeQuery().getInt(1)==1)
+                return true;
+            return false;
         } catch (SQLException e) {
-            System.err.println("Error de base de datos: " + e.getMessage());
-            e.printStackTrace();
-        } catch (Exception e) {
-            System.err.println("Ocurrió un error inesperado.");
-            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    public boolean revisarInventarioSuficiente(int idProducto, int cantidad) {
+        String sql="select cantidad from producto where id =?";
+        try(PreparedStatement stmt = connection.prepareStatement(sql)){
+            stmt.setInt(1,idProducto);
+            if(stmt.executeQuery().getInt(1)>=cantidad)
+                return true;
+            return false;
+        } catch (SQLException e) {
+            System.out.println("Fallo desconocido");
+            return false;
+        }
+    }
+
+    public Double getPrecioActual(int idProducto) {
+        String sql="select precio from producto where id =?";
+        try(PreparedStatement stmt = connection.prepareStatement(sql)){
+            stmt.setInt(1,idProducto);
+            return stmt.executeQuery().getDouble(1);
+        } catch (SQLException e) {
+            return null;
         }
     }
 }

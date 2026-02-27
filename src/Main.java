@@ -1,9 +1,7 @@
-import bbdd.GestionDBCliente;
-import bbdd.GestionDBCompra;
-import bbdd.GestionDBFabricante;
-import bbdd.GestionDBProducto;
+import bbdd.*;
 import jmsb.utils.Input;
 import model.Cliente;
+import model.Compra;
 import model.Producto;
 
 
@@ -12,6 +10,7 @@ public class Main {
     private static GestionDBCompra gestionDBCompra;
     private static GestionDBProducto gestionDBProducto;
     private static GestionDBFabricante gestionDBFabricante;
+    private static GestionDBDetallesCompra gestionDBDetallesCompra;
 
     public static void main(String[] args) {
         initGestion();
@@ -128,6 +127,7 @@ public class Main {
         System.out.println("Introduce el id del fabricante a modificar: ");
         int id = sc.nextInt();
 
+        System.out.println("Introduce el nuevo nombre:");
         if (GestionDBConnection.getInstancia().modificarFabricante(sc, id)) {
             System.out.println("\nMostramos para comprobar");
             GestionDBConnection.getInstancia().mostrarFabricantes();
@@ -150,6 +150,8 @@ public class Main {
     }
 
     private static void annadirFabricante() {
+
+        System.out.print("Nombre del fabricante: ");
         GestionDBConnection.getInstancia().annadirFabricante(sc);
     }
 
@@ -182,9 +184,9 @@ public class Main {
     }
 
     private static void annadirProducto() {
-
+        System.out.print("Precio: ");
         System.out.print("Nombre del producto: ");
-        if (GestionDBConnection.getInstancia().annadirProducto(new Producto(Input.pedirTexto("Nombre del producto"),Input.pedirNumeroDecimal("Precio del producto"),pedirIdFabricante("Id del fabricante")))) {
+        if (gestionDBProducto.annadirProducto(new Producto(Input.pedirTexto("Nombre del producto"),Input.pedirNumeroDecimal("Precio del producto"),pedirIdFabricante("Id del fabricante")))) {
             System.out.println("Producto añadido correctamente");
         }
     }
@@ -246,7 +248,18 @@ public class Main {
     private static void eliminarCompra() {
     }
 
-    private static void realizarCompra() {
-        GestionDBConnection.getInstancia().realizarCompra(sc);
+    private static boolean realizarCompra() {
+        System.out.println("¿Que cliente ha efectuado la compra?");
+        int idCliente=Input.pedirIdComprobadoCliente();
+        if(!gestionDBCliente.isClienteActivo(idCliente)){
+            System.out.println("No es cliente activo");
+            return false;
+        }
+        //get cliente status before checkin
+        gestionDBCompra.realizarCompra(new Compra());
     }
 }
+//        System.out.print("Nombre del cliente: ");
+//        System.out.print("Email del cliente: ");
+//        System.out.print("Telefono del cliente: ");
+//        System.out.print("Direccion del cliente: ");

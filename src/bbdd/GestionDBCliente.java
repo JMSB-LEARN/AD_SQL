@@ -121,15 +121,10 @@ public class GestionDBCliente {
     }
 
     public void eliminarCliente(int id) {
-
-
         String sql = "DELET from Cliente where id_cliente=?";
 
         try (PreparedStatement stmt = connection.prepareStatement(sql); PreparedStatement providerChk = connection.prepareStatement("select id from fabricante where id=?")) {
-
             stmt.setInt(1, id);
-
-
         } catch (NumberFormatException e) {
             System.err.println("Error: El nombre debe de ser valido;.");
         } catch (SQLException e) {
@@ -141,4 +136,27 @@ public class GestionDBCliente {
         }
     }
 
+    public boolean comprobarIdCliente(int id){
+        String sql="select count(id_cliente) from cliente where id =?";
+        try(PreparedStatement stmt = connection.prepareStatement(sql)){
+         stmt.setInt(1,id);
+         if(stmt.executeQuery().getInt(1)==1)
+             return true;
+         return false;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean isClienteActivo(int id){
+        String sql ="select activo from cliente where id_cliente=?";
+        if(comprobarIdCliente(id))
+           try(PreparedStatement stmt = connection.prepareStatement(sql)){
+               stmt.setInt(1,id);
+               return stmt.executeQuery().getBoolean(1);
+           } catch (SQLException e) {
+               throw new RuntimeException(e);
+           }
+        return false;
+    }
 }

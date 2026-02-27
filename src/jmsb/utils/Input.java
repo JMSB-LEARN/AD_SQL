@@ -1,13 +1,36 @@
 package jmsb.utils;
 
+import bbdd.GestionDBCliente;
+import bbdd.GestionDBDetallesCompra;
+import bbdd.GestionDBProducto;
+import model.DetalleCompra;
+
+import javax.management.openmbean.InvalidKeyException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
+class UnrecognizedIDException extends Exception {
+}
+
+class InsuficientStorageException extends Exception {
+}
+//class UnrecognizedIDException extends Exception {
+//}
+
 public class Input {
+    private static Scanner sc;
+
+    private static GestionDBCliente gestionDBCliente;
+    private static GestionDBProducto gestionDBProducto;
+
     static {
         sc = new Scanner(System.in);
+        gestionDBCliente = GestionDBCliente.getInstancia();
+        gestionDBProducto=GestionDBProducto.getInstancia();
     }
 
-    private static Scanner sc;
 
     public static int pedirNumero(String mensaje) {
         while (true) {
@@ -78,10 +101,108 @@ public class Input {
         while (true) {
             System.out.print(mensaje + " (true/false) (o presiona Enter para omitir) : ");
             String entrada = sc.nextLine().trim().toLowerCase();
-            if (entrada.isEmpty())return null;
+            if (entrada.isEmpty()) return null;
             if (entrada.equals("true")) return true;
             if (entrada.equals("false")) return false;
             System.out.println("Error: Debes escribir 'true' o 'false'.");
         }
+    }
+
+    public static int pedirIdComprobadoCliente() {
+        boolean idValido = false;
+        int idAValidar = -1;
+        while (!idValido) {
+            System.out.println("Elige un cliente.");
+            gestionDBCliente.mostrarClientes();
+            System.out.print(":");
+            try {
+                idAValidar = Integer.parseInt(sc.nextLine());
+                if (comprobarIdCliente(idAValidar))
+                    idValido = true;
+                else throw new UnrecognizedIDException();
+            } catch (NumberFormatException e) {
+                System.out.println("Numro no valido");
+            } catch (UnrecognizedIDException e) {
+                System.out.println("Id no reconocido");
+            }
+        }
+        return idAValidar;
+    }
+
+    public static boolean comprobarIdCliente(int id) {
+        return gestionDBCliente.comprobarIdCliente(id);
+    }
+
+    public static List<DetalleCompra> pedirListaDetallesCompra(int idCompra) {
+        List<DetalleCompra> detallesCompra = new ArrayList<>();
+        boolean finalizarCompra = false;
+        while (!finalizarCompra) {
+            try {
+                DetalleCompra detalleCompra = pedirDetalleCompra(idCompra);
+                if (detalleCompra == null)
+                    finalizarCompra = true;
+                else
+                    detallesCompra.add(detalleCompra);
+            }catch (InsuficientStorageException e){
+                System.out.println("No hay inventaio Suficiente");
+            }
+        }
+        return detallesCompra;
+    }
+
+    private static DetalleCompra pedirDetalleCompra(int idCompra) throws InsuficientStorageException {
+        Integer idProducto = pedirIdComprobadoProducto(), cantidad = pedirNumero("Cantidad a comprar");
+        if (idProducto==null)
+        if (!gestionDBProducto.revisarInventarioSuficiente(idProducto, cantidad)) {
+            throw new InsuficientStorageException();
+        }
+        Double precioUnitario = gestionDBProducto.getPrecioActual(idProducto);
+        return new DetalleCompra(idCompra, idProducto, cantidad, precioUnitario);
+    }
+
+    private static int pedirIdComprobadoProducto() {
+        boolean idValido = false;
+        int idAValidar = -1;
+        while (!idValido) {
+            System.out.println("Elige un Producto.");
+            gestionDBProducto.mostrarProductos();
+            System.out.print(":");
+            try {
+                idAValidar = Integer.parseInt(sc.nextLine());
+                if (comprobarIdProducto(idAValidar))
+                    idValido = true;
+                else throw new UnrecognizedIDException();
+            } catch (NumberFormatException e) {
+                System.out.println("Numro no valido");
+            } catch (UnrecognizedIDException e) {
+                System.out.println("Id no reconocido");
+            }
+        }
+        return idAValidar;
+    }
+    private static int pedirIdComprobadoNulleableProducto() {
+        boolean idValido = false;
+        Integer idAValidar = -1;
+        while (!idValido) {
+            System.out.println("Elige un Producto.");
+            gestionDBProducto.mostrarProductos();
+            System.out.print(":");
+            try {
+
+                idAValidar = pedirNumeroNulleable("Que producto queires");
+                if (comprobarIdProducto(idAValidar))
+                    idValido = true;
+                else throw new UnrecognizedIDException();
+            } catch (NumberFormatException e) {
+                System.out.println("Numro no valido");
+            } catch (UnrecognizedIDException e) {
+                System.out.println("Id no reconocido");
+            }
+        }
+        return idAValidar;
+    }
+
+    private static boolean comprobarIdProducto(int id) {
+        return gestionDBProducto.comprobarIdProducto(id);
     }
 }
