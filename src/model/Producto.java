@@ -2,34 +2,33 @@ package model;
 
 public class Producto {
 
-    private int id;
+    private Integer  id;
     private String nombre;
-    private double precio;
-    private int idFabricante;
+    private Double precio;
+    private Integer  idFabricante;
 
-    public Producto(int id, String nombre, double precio) {
+    public Producto(Integer id, String nombre, Double precio) {
         this.id = id;
         this.nombre = nombre;
         this.precio = precio;
     }
 
-    public Producto(int id, String nombre, double precio, int idFabricante){
+    public Producto(Integer id, String nombre, Double precio, Integer idFabricante){
         this.nombre = nombre;
         this.precio = precio;
         this.idFabricante = idFabricante;
     }
-    public Producto(String nombre, double precio, int idFabricante) {
-        this.id = id;
+    public Producto(String nombre, Double precio, Integer idFabricante) {
         this.nombre = nombre;
         this.precio = precio;
         this.idFabricante = idFabricante;
     }
 
-    public int getId() {
+    public Integer  getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -41,15 +40,15 @@ public class Producto {
         this.nombre = nombre;
     }
 
-    public double getPrecio() {
+    public Double getPrecio() {
         return precio;
     }
 
-    public void setPrecio(double precio) {
+    public void setPrecio(Double precio) {
         this.precio = precio;
     }
 
-    public int getIdFabricante() {
+    public Integer getIdFabricante() {
         return idFabricante;
     }
 

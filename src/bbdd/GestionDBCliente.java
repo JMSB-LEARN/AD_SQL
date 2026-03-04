@@ -18,7 +18,7 @@ public class GestionDBCliente {
         if (instancia == null) {
             instancia = new GestionDBCliente();
         }
-        connection=GestionDBConnection.getInstancia().getConnection();
+        connection = GestionDBConnection.getInstancia().getConnection();
         return instancia;
     }
 
@@ -54,7 +54,7 @@ public class GestionDBCliente {
     public void annadirCliente(Cliente cliente) {
         String sql = "INSERT INTO Cliente (nombre,email,telefono,direction) VALUES (?,?,?,?,?)";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql); PreparedStatement providerChk = connection.prepareStatement("select id from fabricante where id=?")) {
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
 
             stmt.setString(1, cliente.getNombre());
             stmt.setString(2, cliente.getEmail());
@@ -136,27 +136,30 @@ public class GestionDBCliente {
         }
     }
 
-    public boolean comprobarIdCliente(int id){
-        String sql="select count(id_cliente) from cliente where id =?";
-        try(PreparedStatement stmt = connection.prepareStatement(sql)){
-         stmt.setInt(1,id);
-         if(stmt.executeQuery().getInt(1)==1)
-             return true;
-         return false;
+    public boolean comprobarIdCliente(int id) {
+        String sql = "select count(id) from cliente where id_cliente =?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next())
+                return rs.getInt(1) == 1;
+            return false;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public boolean isClienteActivo(int id){
-        String sql ="select activo from cliente where id_cliente=?";
-        if(comprobarIdCliente(id))
-           try(PreparedStatement stmt = connection.prepareStatement(sql)){
-               stmt.setInt(1,id);
-               return stmt.executeQuery().getBoolean(1);
-           } catch (SQLException e) {
-               throw new RuntimeException(e);
-           }
+    public boolean isClienteActivo(int id) {
+        String sql = "select activo from cliente where id_cliente=?";
+        if (comprobarIdCliente(id))
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                stmt.setInt(1, id);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next())
+                    return rs.getBoolean(1);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         return false;
     }
 }

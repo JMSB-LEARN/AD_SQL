@@ -6,13 +6,17 @@ public class Compra {
     private int id;
     private Integer idCliente;
     LocalDateTime fechaCompra;
-    private Double totalComra;
+    private Double totalCompra;
 
-    public Compra(int id, Integer idCliente, LocalDateTime fechaCompra, Double totalComra) {
+    public Compra(int id, Integer idCliente, LocalDateTime fechaCompra, Double totalCompra) {
         this.id = id;
         this.idCliente = idCliente;
         this.fechaCompra = fechaCompra;
-        this.totalComra = totalComra;
+        this.totalCompra = totalCompra;
+    }
+    public Compra(Integer idCliente, LocalDateTime fechaCompra) {
+        this.idCliente = idCliente;
+        this.fechaCompra = fechaCompra;
     }
 
     public int getId() {
@@ -35,11 +39,11 @@ public class Compra {
         this.fechaCompra = fechaCompra;
     }
 
-    public Double getTotalComra() {
-        return totalComra;
+    public Double getTotalCompra() {
+        return totalCompra;
     }
 
-    public void setTotalComra(Double totalComra) {
-        this.totalComra = totalComra;
+    public void setTotalCompra(Double totalCompra) {
+        this.totalCompra = totalCompra;
     }
 }

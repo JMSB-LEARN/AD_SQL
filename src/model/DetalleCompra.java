@@ -19,6 +19,11 @@ public class DetalleCompra {
         this.precioUnitario = precioUnitario;
     }
 
+    public DetalleCompra(Integer idProducto, Integer cantidad) {
+        this.idProducto=idProducto;
+        this.cantidad =cantidad;
+    }
+
     public int getId() {
         return id;
     }

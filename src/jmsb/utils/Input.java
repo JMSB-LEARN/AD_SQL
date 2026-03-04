@@ -1,12 +1,10 @@
 package jmsb.utils;
 
 import bbdd.GestionDBCliente;
-import bbdd.GestionDBDetallesCompra;
+import bbdd.GestionDBFabricante;
 import bbdd.GestionDBProducto;
 import model.DetalleCompra;
 
-import javax.management.openmbean.InvalidKeyException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -16,23 +14,24 @@ class UnrecognizedIDException extends Exception {
 
 class InsuficientStorageException extends Exception {
 }
-//class UnrecognizedIDException extends Exception {
-//}
 
 public class Input {
     private static Scanner sc;
 
     private static GestionDBCliente gestionDBCliente;
     private static GestionDBProducto gestionDBProducto;
+    private static GestionDBFabricante gestionDBFabricante;
 
     static {
         sc = new Scanner(System.in);
         gestionDBCliente = GestionDBCliente.getInstancia();
-        gestionDBProducto=GestionDBProducto.getInstancia();
+        gestionDBProducto = GestionDBProducto.getInstancia();
+        gestionDBFabricante=GestionDBFabricante.getInstancia();
     }
 
+    //Inputs Numericos
 
-    public static int pedirNumero(String mensaje) {
+    public static Integer pedirInt(String mensaje) {
         while (true) {
             try {
                 System.out.print(mensaje + ": ");
@@ -43,25 +42,7 @@ public class Input {
         }
     }
 
-    public static String pedirTexto(String mensaje) {
-        while (true) {
-            System.out.print(mensaje + ": ");
-            String texto = sc.nextLine().trim();
-            if (!texto.isEmpty()) return texto;
-            System.out.println("Error: El texto no puede estar vacío.");
-        }
-    }
-
-    public static String pedirTextoNulleable(String mensaje) {
-        while (true) {
-            System.out.print(mensaje + ": ");
-            String texto = sc.nextLine().trim();
-            if (!texto.isEmpty()) return texto;
-            return null;
-        }
-    }
-
-    public static Integer pedirNumeroNulleable(String mensaje) {
+    public static Integer pedirIntNulleable(String mensaje) {
         while (true) {
             System.out.print(mensaje + " (o presiona Enter para omitir): ");
             String entrada = sc.nextLine().trim();
@@ -87,28 +68,88 @@ public class Input {
         }
     }
 
-    public static Boolean pedirBooleanoEstricto(String mensaje) {
+    public static double pedirNumeroDecimal(String mensaje) {
         while (true) {
-            System.out.print(mensaje + " (true/false): ");
-            String entrada = sc.nextLine().trim().toLowerCase();
-            if (entrada.equals("true")) return true;
-            if (entrada.equals("false")) return false;
-            System.out.println("Error: Debes escribir 'true' o 'false'.");
+            System.out.print(mensaje);
+            String entrada = sc.nextLine().trim();
+            try {
+                return Double.parseDouble(entrada.replace(',', '.')); // Soporte para comas
+            } catch (NumberFormatException e) {
+                System.out.println("Error: Introduce un decimal válido.");
+            }
         }
     }
 
-    public static Boolean pedirBooleanoEstrictoNulleable(String mensaje) {
-        while (true) {
-            System.out.print(mensaje + " (true/false) (o presiona Enter para omitir) : ");
-            String entrada = sc.nextLine().trim().toLowerCase();
-            if (entrada.isEmpty()) return null;
-            if (entrada.equals("true")) return true;
-            if (entrada.equals("false")) return false;
-            System.out.println("Error: Debes escribir 'true' o 'false'.");
+
+    //Inputs IDs
+
+    public static int pedirIdProducto() {
+        boolean idValido = false;
+        int idAValidar = -1;
+        while (!idValido) {
+            System.out.println("Elige un Producto.");
+            gestionDBProducto.mostrarProductos();
+            System.out.print(":");
+            try {
+                idAValidar = Integer.parseInt(sc.nextLine());
+                if (comprobarIdProducto(idAValidar))
+                    idValido = true;
+                else throw new UnrecognizedIDException();
+            } catch (NumberFormatException e) {
+                System.out.println("Numro no valido");
+            } catch (UnrecognizedIDException e) {
+                System.out.println("Id no reconocido");
+            }
         }
+        return idAValidar;
     }
 
-    public static int pedirIdComprobadoCliente() {
+    private static Integer pedirIdProductoNulleable() {
+        boolean idValido = false;
+        Integer idAValidar = -1;
+        while (!idValido) {
+            System.out.println("Elige un Producto.");
+            gestionDBProducto.mostrarProductos();
+            System.out.print(":");
+            try {
+                idAValidar = pedirIntNulleable("Que producto queires");
+                if(idAValidar==null){
+                    return null;
+                }
+                if (comprobarIdProducto(idAValidar))
+                    idValido = true;
+                else throw new UnrecognizedIDException();
+            } catch (NumberFormatException e) {
+                System.out.println("Numro no valido");
+            } catch (UnrecognizedIDException e) {
+                System.out.println("Id no reconocido");
+            }
+        }
+        return idAValidar;
+    }
+
+    public static int pedirIdFabricante() {
+        boolean idValido = false;
+        int idAValidar = -1;
+        while (!idValido) {
+            System.out.println("Elige un fabricante.");
+            gestionDBFabricante.mostrarFabricantes();
+            System.out.print(":");
+            try {
+                idAValidar = Integer.parseInt(sc.nextLine());
+                if (comprobarIdFabricante(idAValidar))
+                    idValido = true;
+                else throw new UnrecognizedIDException();
+            } catch (NumberFormatException e) {
+                System.out.println("Numro no valido");
+            } catch (UnrecognizedIDException e) {
+                System.out.println("Id no reconocido");
+            }
+        }
+        return idAValidar;
+    }
+
+    public static int pedirIdCliente() {
         boolean idValido = false;
         int idAValidar = -1;
         while (!idValido) {
@@ -129,80 +170,85 @@ public class Input {
         return idAValidar;
     }
 
-    public static boolean comprobarIdCliente(int id) {
-        return gestionDBCliente.comprobarIdCliente(id);
+    //Inputs Varios
+
+    public static String pedirTexto(String mensaje) {
+        while (true) {
+            System.out.print(mensaje + ": ");
+            String texto = sc.nextLine().trim();
+            if (!texto.isEmpty()) return texto;
+            System.out.println("Error: El texto no puede estar vacío.");
+        }
     }
 
-    public static List<DetalleCompra> pedirListaDetallesCompra(int idCompra) {
+    public static String pedirTextoNulleable(String mensaje) {
+        while (true) {
+            System.out.print(mensaje + ": ");
+            String texto = sc.nextLine().trim();
+            if (!texto.isEmpty()) return texto;
+            return null;
+        }
+    }
+
+    public static Boolean pedirBooleanoEstricto(String mensaje) {
+        while (true) {
+            System.out.print(mensaje + " (true/false): ");
+            String entrada = sc.nextLine().trim().toLowerCase();
+            if (entrada.equals("true")) return true;
+            if (entrada.equals("false")) return false;
+            System.out.println("Error: Debes escribir 'true' o 'false'.");
+        }
+    }
+
+    public static Boolean pedirBooleanoEstrictoNulleable(String mensaje) {
+        while (true) {
+            System.out.print(mensaje + " (true/false) (o presiona Enter para omitir) : ");
+            String entrada = sc.nextLine().trim().toLowerCase();
+            if (entrada.isEmpty()) return null;
+            if (entrada.equals("true")) return true;
+            if (entrada.equals("false")) return false;
+            System.out.println("Error: Debes escribir 'true' o 'false'.");
+        }
+    }
+    //inputs Complejos
+
+    public static List<DetalleCompra> pedirListaDetallesCompra() {
         List<DetalleCompra> detallesCompra = new ArrayList<>();
         boolean finalizarCompra = false;
         while (!finalizarCompra) {
             try {
-                DetalleCompra detalleCompra = pedirDetalleCompra(idCompra);
+                DetalleCompra detalleCompra = pedirDetalleCompra();
                 if (detalleCompra == null)
                     finalizarCompra = true;
                 else
                     detallesCompra.add(detalleCompra);
-            }catch (InsuficientStorageException e){
+            } catch (InsuficientStorageException e) {
                 System.out.println("No hay inventaio Suficiente");
             }
         }
         return detallesCompra;
     }
 
-    private static DetalleCompra pedirDetalleCompra(int idCompra) throws InsuficientStorageException {
-        Integer idProducto = pedirIdComprobadoProducto(), cantidad = pedirNumero("Cantidad a comprar");
-        if (idProducto==null)
-        if (!gestionDBProducto.revisarInventarioSuficiente(idProducto, cantidad)) {
-            throw new InsuficientStorageException();
-        }
-        Double precioUnitario = gestionDBProducto.getPrecioActual(idProducto);
-        return new DetalleCompra(idCompra, idProducto, cantidad, precioUnitario);
+    private static DetalleCompra pedirDetalleCompra() throws InsuficientStorageException {
+        Integer idProducto = pedirIdProducto(), cantidad = pedirInt("Cantidad a comprar");
+        if (idProducto == null)
+            if (!gestionDBProducto.revisarInventarioSuficiente(idProducto, cantidad)) {
+                throw new InsuficientStorageException();
+            }
+        return new DetalleCompra(idProducto, cantidad);
     }
 
-    private static int pedirIdComprobadoProducto() {
-        boolean idValido = false;
-        int idAValidar = -1;
-        while (!idValido) {
-            System.out.println("Elige un Producto.");
-            gestionDBProducto.mostrarProductos();
-            System.out.print(":");
-            try {
-                idAValidar = Integer.parseInt(sc.nextLine());
-                if (comprobarIdProducto(idAValidar))
-                    idValido = true;
-                else throw new UnrecognizedIDException();
-            } catch (NumberFormatException e) {
-                System.out.println("Numro no valido");
-            } catch (UnrecognizedIDException e) {
-                System.out.println("Id no reconocido");
-            }
-        }
-        return idAValidar;
-    }
-    private static int pedirIdComprobadoNulleableProducto() {
-        boolean idValido = false;
-        Integer idAValidar = -1;
-        while (!idValido) {
-            System.out.println("Elige un Producto.");
-            gestionDBProducto.mostrarProductos();
-            System.out.print(":");
-            try {
+    //Comprobadores
 
-                idAValidar = pedirNumeroNulleable("Que producto queires");
-                if (comprobarIdProducto(idAValidar))
-                    idValido = true;
-                else throw new UnrecognizedIDException();
-            } catch (NumberFormatException e) {
-                System.out.println("Numro no valido");
-            } catch (UnrecognizedIDException e) {
-                System.out.println("Id no reconocido");
-            }
-        }
-        return idAValidar;
+    public static boolean comprobarIdCliente(int id) {
+        return gestionDBCliente.comprobarIdCliente(id);
     }
 
     private static boolean comprobarIdProducto(int id) {
         return gestionDBProducto.comprobarIdProducto(id);
     }
+
+    private static boolean comprobarIdFabricante(int id) {return gestionDBFabricante.comprobarIdFabricante(id);}
+
+
 }

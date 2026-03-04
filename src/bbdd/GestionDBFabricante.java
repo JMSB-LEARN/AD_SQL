@@ -19,14 +19,13 @@ public class GestionDBFabricante {
         if (instancia == null) {
             instancia = new GestionDBFabricante();
         }
-        connection=GestionDBConnection.getInstancia().getConnection();
+        connection = GestionDBConnection.getInstancia().getConnection();
         return instancia;
     }
 
     public List<Fabricante> obtenerFabricantes() {
         List<Fabricante> fabricantes = new ArrayList<>();
-        try {
-            PreparedStatement stmt = connection.prepareStatement("SELECT * FROM fabricante");
+        try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM fabricante");) {
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
@@ -72,35 +71,6 @@ public class GestionDBFabricante {
         return fabricante;
     }
 
-    public void mostrarProductosFabricante(String nombreFabricante) {
-        List<Producto> productos = new ArrayList<>();
-        try {
-            PreparedStatement stmt = connection.prepareStatement("SELECT *" + " FROM producto p JOIN fabricante f ON p.id_fabricante = f.id" + " WHERE f.nombre = ?");
-
-            stmt.setString(1, nombreFabricante);
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                int id = rs.getInt("id");
-                String nombre = rs.getString("nombre");
-                double precio = rs.getDouble("precio");
-                int idFabricante = rs.getInt("id_fabricante");
-                Producto p = new Producto(id, nombre, precio, idFabricante);
-                productos.add(p);
-            }
-        } catch (SQLException ex) {
-            System.out.println("Error al leer los productos");
-            ex.printStackTrace();
-        }
-
-        if (productos.isEmpty()) {
-            System.out.println("No hay productos asociados al fabricante indicado.");
-        } else {
-            for (Producto p : productos) {
-                System.out.println(p);
-            }
-        }
-    }
 
     private Fabricante buscarFabricante(int id) {
         Fabricante f = null;
@@ -167,4 +137,18 @@ public class GestionDBFabricante {
         return true;
     }
 
+    public boolean comprobarIdFabricante(int id) {
+        String sql = "select count(id) from fabricante where id =?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next())
+                return rs.getInt(1) == 1;
+            return false;
+        } catch (SQLException e) {
+            System.out.println("Id no reconocido");
+        }
+
+        return false;
+    }
 }

@@ -2,7 +2,10 @@ import bbdd.*;
 import jmsb.utils.Input;
 import model.Cliente;
 import model.Compra;
+import model.Fabricante;
 import model.Producto;
+
+import java.time.LocalDateTime;
 
 
 public class Main {
@@ -26,7 +29,7 @@ public class Main {
 
     private static void mostrarMenu() {
         while (true) {
-            switch (Input.pedirNumero("1.Acciones de Productos\n" + "2.Acciones de Fabricantes\n" + "3.Acciones de Clientes\n" + "4.Acciones de Compras\n" + "5. Salir")) {
+            switch (Input.pedirInt("1.Acciones de Productos\n" + "2.Acciones de Fabricantes\n" + "3.Acciones de Clientes\n" + "4.Acciones de Compras\n" + "5. Salir")) {
                 case 1:
                     mostrarMenuProductos();
                     break;
@@ -49,7 +52,7 @@ public class Main {
 
     private static void mostarMenuClientes() {
         while (true) {
-            switch (Input.pedirNumero("1.Añadir Cliente\n" + "2.Modificar Cliente\n" + "3.Eliminar Cliente.\n" + "4.Mostrar Clientes.\n" + "5.Volver")) {
+            switch (Input.pedirInt("1.Añadir Cliente\n" + "2.Modificar Cliente\n" + "3.Eliminar Cliente.\n" + "4.Mostrar Clientes.\n" + "5.Volver")) {
                 case 1:
                     annadirCliente();
                     break;
@@ -76,12 +79,12 @@ public class Main {
 
     private static void modificarCliente() {
         mostrarClientes();
-        gestionDBCliente.modificarCliente(new Cliente(Input.pedirNumero("¿Cual es el id del cliente a modificar?"),Input.pedirTextoNulleable("Nombre del cliente: "),Input.pedirTextoNulleable("Email del cliente: "),Input.pedirTextoNulleable("Telefono del cliente: "),Input.pedirTextoNulleable("Direccion del cliente: "),Input.pedirBooleanoEstrictoNulleable("¿Esta activo?: ")));
+        gestionDBCliente.modificarCliente(new Cliente(Input.pedirInt("¿Cual es el id del cliente a modificar?"),Input.pedirTextoNulleable("Nombre del cliente: "),Input.pedirTextoNulleable("Email del cliente: "),Input.pedirTextoNulleable("Telefono del cliente: "),Input.pedirTextoNulleable("Direccion del cliente: "),Input.pedirBooleanoEstrictoNulleable("¿Esta activo?: ")));
     }
 
     private static void eliminarCliente() {
         mostrarClientes();
-        gestionDBCliente.eliminarCliente(Input.pedirNumero("¿Cual es el id del cliente a eliminar?"));
+        gestionDBCliente.eliminarCliente(Input.pedirInt("¿Cual es el id del cliente a eliminar?"));
     }
 
     private static void mostrarClientes() {
@@ -91,7 +94,7 @@ public class Main {
 
     private static void mostrarMenuFabricantes() {
         while (true) {
-            switch (Input.pedirNumero("1.Mostrar todos los Fabricantes\n" + "2.Añadir Fabricante\n" + "3.Modificar los datos de un Fabricante.\n" + "4.Eliminar un Fabricante.\n" + "5.Volver")) {
+            switch (Input.pedirInt("1.Mostrar todos los Fabricantes\n" + "2.Añadir Fabricante\n" + "3.Modificar los datos de un Fabricante.\n" + "4.Eliminar un Fabricante.\n" + "5.Volver")) {
                 case 1:
                     mostrarFabricantes();
                     break;
@@ -112,54 +115,45 @@ public class Main {
         }
     }
 
-    private static int pedirIdFabricante(String idDelFabricante) {
-        GestionDBConnection.getInstancia().mostrarFabricantes();
-    }
-
     private static void mostrarFabricantes() {
-        GestionDBConnection.getInstancia().mostrarFabricantes();
+        gestionDBFabricante.mostrarFabricantes();
     }
 
     private static void modificarFabricante() {
         System.out.println("Elige el fabricante a modificar:");
-        GestionDBConnection.getInstancia().mostrarFabricantes();
+        gestionDBFabricante.mostrarFabricantes();
 
-        System.out.println("Introduce el id del fabricante a modificar: ");
-        int id = sc.nextInt();
+        int id = Input.pedirIdFabricante();
 
         System.out.println("Introduce el nuevo nombre:");
-        if (GestionDBConnection.getInstancia().modificarFabricante(sc, id)) {
-            System.out.println("\nMostramos para comprobar");
-            GestionDBConnection.getInstancia().mostrarFabricantes();
+        if (gestionDBFabricante.modificarFabricante(new Fabricante(Input.pedirIdFabricante(),Input.pedirTextoNulleable("Introduce el nuevo nombre:")))) {
+            gestionDBFabricante.mostrarFabricantes();
         }
     }
 
     private static void eliminarFabricante() {
 
         System.out.println("Elige el fabricante a eliminar:");
-        GestionDBConnection.getInstancia().mostrarFabricantes();
+        gestionDBFabricante.mostrarFabricantes();
 
         System.out.println("Introduce el id del fabricante a eliminar: ");
-        int id = sc.nextInt();
-        sc.nextLine();
+        int id = Input.pedirIdFabricante();
 
-        if (GestionDBConnection.getInstancia().eliminarFabricante(id)) {
+        if (gestionDBFabricante.eliminarFabricante(id)) {
             System.out.println("\nMostramos para comprobar");
-            GestionDBConnection.getInstancia().mostrarFabricantes();
+            gestionDBFabricante.getInstancia().mostrarFabricantes();
         }
     }
 
     private static void annadirFabricante() {
-
-        System.out.print("Nombre del fabricante: ");
-        GestionDBConnection.getInstancia().annadirFabricante(sc);
+        gestionDBFabricante.annadirFabricante(new Fabricante(Input.pedirTexto("Nombre del fabricante: ")));
     }
 
 
 
     private static void mostrarMenuProductos() {
         while (true) {
-            switch (Input.pedirNumero("1.Mostrar todos los productos de la tienda\n" + "2.Mostrar los productos del fabricante\n" + "3.Añadir producto\n" + "4.Modificar los datos de un producto.\n" + "5.Eliminar un producto.\n" + "6.Volver")) {
+            switch (Input.pedirInt("1.Mostrar todos los productos de la tienda\n" + "2.Mostrar los productos del fabricante\n" + "3.Añadir producto\n" + "4.Modificar los datos de un producto.\n" + "5.Eliminar un producto.\n" + "6.Volver")) {
                 case 1:
                     mostrarProductos();
                     break;
@@ -186,43 +180,45 @@ public class Main {
     private static void annadirProducto() {
         System.out.print("Precio: ");
         System.out.print("Nombre del producto: ");
-        if (gestionDBProducto.annadirProducto(new Producto(Input.pedirTexto("Nombre del producto"),Input.pedirNumeroDecimal("Precio del producto"),pedirIdFabricante("Id del fabricante")))) {
+        if (gestionDBProducto.annadirProducto(new Producto(Input.pedirTexto("Nombre del producto"),Input.pedirNumeroDecimal("Precio del producto"),Input.pedirIdFabricante()))) {
             System.out.println("Producto añadido correctamente");
         }
     }
 
     private static void mostrarProductos() {
-        GestionDBConnection.getInstancia().mostrarProductos();
+        gestionDBProducto.mostrarProductos();
     }
 
     private static void mostrarProductos(String fabricante) {
-        GestionDBConnection.getInstancia().mostrarProductosFabricante(fabricante);
+        gestionDBProducto.mostrarProductosFabricante(fabricante);
     }
 
     private static void modificarProducto() {
         System.out.println("Elige el producto a modificar:");
-        GestionDBConnection.getInstancia().mostrarProductos();
+        gestionDBProducto.mostrarProductos();
 
         System.out.println("Introduce el id del producto a modificar: ");
-        int id = sc.nextInt();
+        int id = Input.pedirIdProducto();
 
-        if (GestionDBConnection.getInstancia().modificarProducto(sc, id)) {
+        System.out.println("Introduce el nuevo nombre:");
+        System.out.println("Introduce el nuevo precio:");
+        if (gestionDBProducto.modificarProducto(new Producto(Input.pedirIdProducto(),Input.pedirTextoNulleable("Nuevo nombre del producto"),Input.pedirNumeroDecimal("Nuevo precio del producto")))) {
+
             System.out.println("\nMostramos para comprobar");
-            GestionDBConnection.getInstancia().mostrarProductos();
+            gestionDBProducto.mostrarProducto(id);
         }
     }
 
     private static void eliminarProducto() {
         System.out.println("Elige el producto a eliminar:");
-        GestionDBConnection.getInstancia().mostrarProductos();
+        gestionDBProducto.mostrarProductos();
 
         System.out.println("Introduce el id del producto a eliminar: ");
-        int id = sc.nextInt();
-        sc.nextLine();
+        int id = Input.pedirIdProducto();
 
-        if (GestionDBConnection.getInstancia().eliminarProducto(id)) {
+        if (gestionDBProducto.eliminarProducto(id)) {
             System.out.println("\nMostramos para comprobar");
-            GestionDBConnection.getInstancia().mostrarProductos();
+            gestionDBProducto.mostrarProductos();
         }
     }
 
@@ -230,7 +226,7 @@ public class Main {
 
     private static void mostrarMenuCompras() {
         while (true) {
-            switch (Input.pedirNumero("1.Realizar Compra\n" + "2.Eliminar Compra\n" + "3.Volver")) {
+            switch (Input.pedirInt("1.Realizar Compra\n" + "2.Eliminar Compra\n" + "3.Volver")) {
                 case 1:
                     realizarCompra();
                     break;
@@ -250,13 +246,12 @@ public class Main {
 
     private static boolean realizarCompra() {
         System.out.println("¿Que cliente ha efectuado la compra?");
-        int idCliente=Input.pedirIdComprobadoCliente();
+        int idCliente=Input.pedirIdCliente();
         if(!gestionDBCliente.isClienteActivo(idCliente)){
             System.out.println("No es cliente activo");
             return false;
         }
-        //get cliente status before checkin
-        gestionDBCompra.realizarCompra(new Compra());
+        return gestionDBCompra.realizarCompra(new Compra(idCliente, LocalDateTime.now()),Input.pedirListaDetallesCompra());
     }
 }
 //        System.out.print("Nombre del cliente: ");

@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class GestionDBCompra {
-    public class NoDetailsOnCheckuotExceptiopn extends Exception{}
+    public static class NoDetailsOnCheckoutExceptiopn extends Exception{}
     private static Connection connection;
     private static GestionDBCompra instancia;
 
@@ -23,6 +23,7 @@ public class GestionDBCompra {
     }
     public boolean realizarCompra(Compra compra, List<DetalleCompra> detallesCompra) {
         // 1. Validar entrada antes de abrir transacciones
+
         if (detallesCompra == null || detallesCompra.isEmpty()) {
             System.err.println("Error: No hay detalles en la compra.");
             return false;

@@ -9,7 +9,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class GestionDBProducto {
     private static Connection connection;
@@ -19,14 +18,13 @@ public class GestionDBProducto {
         if (instancia == null) {
             instancia = new GestionDBProducto();
         }
-        connection=GestionDBConnection.getInstancia().getConnection();
+        connection = GestionDBConnection.getInstancia().getConnection();
         return instancia;
     }
 
     public List<Producto> obtenerProductos() {
         List<Producto> productos = new ArrayList<>();
-        try {
-            PreparedStatement stmt = connection.prepareStatement("SELECT * FROM producto p JOIN fabricante f ON p.id_fabricante = f.id");
+        try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM producto p JOIN fabricante f ON p.id_fabricante = f.id");) {
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
@@ -72,8 +70,7 @@ public class GestionDBProducto {
 
     private Producto buscarProducto(int id) {
         Producto p = null;
-        try {
-            PreparedStatement stmt = connection.prepareStatement("SELECT *" + " FROM producto p" + " WHERE id = ?");
+        try (PreparedStatement stmt = connection.prepareStatement("SELECT *" + " FROM producto p" + " WHERE id = ?");) {
 
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
@@ -92,26 +89,39 @@ public class GestionDBProducto {
         return p;
     }
 
-    public boolean modificarProducto(Scanner sc, int id) {
-        Producto p = buscarProducto(id);
-        if (p == null) {
+    public boolean modificarProducto(Producto datosNuevosProducto) {
+        boolean modificar = false;
+        List<Object> elementosAModificar = new ArrayList<>();
+        int index = 0;
+        if (datosNuevosProducto == null) {
             System.out.println("No se ha encontrado el producto indicado.");
             return false;
         }
 
-        System.out.println("Introduce el nuevo nombre:");
-        p.setNombre(sc.nextLine());
+        StringBuilder sqlUpdate = new StringBuilder("UPDATE producto SET ");
+        if (datosNuevosProducto.getNombre() != null) {
+            modificar = true;
+            sqlUpdate.append("nombre = ?, ");
+            elementosAModificar.add(datosNuevosProducto.getNombre());
+        }
+        if (datosNuevosProducto.getPrecio() != null) {
+            modificar = true;
+            sqlUpdate.append("precio = ?, ");
+            elementosAModificar.add(datosNuevosProducto.getPrecio());
+        }
+        if (!modificar) {
+            System.out.println("No se modificara nada");
+            return false;
+        }
+        sqlUpdate.setLength(sqlUpdate.length() - 2);
 
-        System.out.println("Introduce el nuevo precio:");
-        p.setPrecio(sc.nextDouble());
+        sqlUpdate.append(" WHERE id = ?");
+        elementosAModificar.add(datosNuevosProducto.getId());
 
-        try {
-            PreparedStatement stmt = connection.prepareStatement("UPDATE producto" + " SET nombre = ?, precio = ?" + " WHERE id = ?");
-
-            stmt.setString(1, p.getNombre());
-            stmt.setDouble(2, p.getPrecio());
-            stmt.setInt(3, p.getId());
-
+        try (PreparedStatement stmt = connection.prepareStatement(sqlUpdate.toString());) {
+            for (Object o : elementosAModificar) {
+                stmt.setObject(++index, o);
+            }
             stmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println("Error al modificar el producto en la BBDD.");
@@ -130,8 +140,7 @@ public class GestionDBProducto {
             return false;
         }
 
-        try {
-            PreparedStatement stmt = connection.prepareStatement("DELETE FROM producto" + " WHERE id = ?");
+        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM producto" + " WHERE id = ?");) {
 
             stmt.setInt(1, p.getId());
 
@@ -145,25 +154,24 @@ public class GestionDBProducto {
         System.out.println("Se ha eliminado la información del producto.");
         return true;
     }
-    public boolean comprobarIdProducto(int id){
-        String sql="select count(id_producto) from producto where id =?";
-        try(PreparedStatement stmt = connection.prepareStatement(sql)){
-            stmt.setInt(1,id);
-            if(stmt.executeQuery().getInt(1)==1)
-                return true;
+
+    public boolean comprobarIdProducto(int id) {
+        String sql = "select count(id_producto) from producto where id =?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            if (stmt.executeQuery().getInt(1) == 1) return true;
             return false;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            return false;
         }
     }
 
 
     public boolean revisarInventarioSuficiente(int idProducto, int cantidad) {
-        String sql="select cantidad from producto where id =?";
-        try(PreparedStatement stmt = connection.prepareStatement(sql)){
-            stmt.setInt(1,idProducto);
-            if(stmt.executeQuery().getInt(1)>=cantidad)
-                return true;
+        String sql = "select cantidad from producto where id =?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, idProducto);
+            if (stmt.executeQuery().getInt(1) >= cantidad) return true;
             return false;
         } catch (SQLException e) {
             System.out.println("Fallo desconocido");
@@ -172,12 +180,48 @@ public class GestionDBProducto {
     }
 
     public Double getPrecioActual(int idProducto) {
-        String sql="select precio from producto where id =?";
-        try(PreparedStatement stmt = connection.prepareStatement(sql)){
-            stmt.setInt(1,idProducto);
-            return stmt.executeQuery().getDouble(1);
+        String sql = "select precio from producto where id =?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, idProducto);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) return rs.getDouble(1);
         } catch (SQLException e) {
             return null;
         }
+        return null;
+    }
+
+    public void mostrarProductosFabricante(String nombreFabricante) {
+        List<Producto> productos = new ArrayList<>();
+        try (PreparedStatement stmt = connection.prepareStatement("SELECT *" + " FROM producto p JOIN fabricante f ON p.id_fabricante = f.id" + " WHERE f.nombre = ?");) {
+
+
+            stmt.setString(1, nombreFabricante);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String nombre = rs.getString("nombre");
+                double precio = rs.getDouble("precio");
+                int idFabricante = rs.getInt("id_fabricante");
+                Producto p = new Producto(id, nombre, precio, idFabricante);
+                productos.add(p);
+            }
+        } catch (SQLException ex) {
+            System.out.println("Error al leer los productos");
+            ex.printStackTrace();
+        }
+
+        if (productos.isEmpty()) {
+            System.out.println("No hay productos asociados al fabricante indicado.");
+        } else {
+            for (Producto p : productos) {
+                System.out.println(p);
+            }
+        }
+    }
+
+    public void mostrarProducto(int id) {
+
     }
 }
